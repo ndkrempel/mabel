@@ -307,12 +307,30 @@ class Bid {
 
 function* smpConstructiveBid(hand, vulnerability, seat, initialBid) {
   const hcp = hand.hcp();
+  const response = function*(passedHand, openingBid) {
+    // Responding.
+    if (openingBid.level === 1 && openingBid.strain === Strain.CLUBS) {
+      if (hcp <= 7) {
+        yield [new Bid(1, Strain.DIAMONDS), '0-7 HCP'];
+        return;
+      }
+      if (hcp <= 11 && !passedHand) {
+        yield [new Bid(1, Strain.HEARTS), '8-11 HCP'];
+        return;
+      }
+      // TODO
+      return;
+    }
+  };
   if (!initialBid) {
+    // Opening.
     const balanced = hand.isBalanced();
     // TODO: 10-point upgrades.
     if (hcp < 11) {
       // TODO: Pre-empts.
-      yield [null, '0-10 HCP'];
+      const bid = yield [null, '0-10 HCP'];
+      // Responding as passed hand.
+      yield* response(true /* passedHand */, bid);
       return;
     }
     if (balanced && hcp >= 14 && hcp <= 16) {
@@ -381,18 +399,9 @@ function* smpConstructiveBid(hand, vulnerability, seat, initialBid) {
     yield [new Bid(1, Strain.DIAMONDS), '2+♦, 10-15 HCP'];
     return;
   } else {
-    if (initialBid.level === 1 && initialBid.strain === Strain.CLUBS) {
-      if (hcp <= 7) {
-        yield [new Bid(1, Strain.DIAMONDS), '0-7 HCP'];
-        return;
-      }
-      if (hcp <= 11) {
-        yield [new Bid(1, Strain.HEARTS), '8-11 HCP'];
-        return;
-      }
-      // TODO
-      return;
-    }
+    // Responding as non-passed hand.
+    yield* response(false /* passedHand */, initialBid);
+    return;
   }
 }
 
