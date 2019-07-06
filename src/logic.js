@@ -312,49 +312,49 @@ function* smpConstructiveBid(hand, vulnerability, seat, initialBid) {
     // TODO: 10-point upgrades.
     if (hcp < 11) {
       // TODO: Pre-empts.
-      yield [null, "0-10 HCP"];
+      yield [null, '0-10 HCP'];
       return;
     }
     if (balanced && hcp >= 14 && hcp <= 16) {
       // TODO: Include (some) 5m(422).
-      yield [new Bid(1, Strain.NO_TRUMP), "14-16 HCP, balanced"];
+      yield [new Bid(1, Strain.NO_TRUMP), '14-16 HCP, balanced'];
       return;
     }
     if (balanced && hcp >= 20 && hcp <= 21) {
-      yield [new Bid(2, Strain.NO_TRUMP), "20-21 HCP, balanced"];
+      yield [new Bid(2, Strain.NO_TRUMP), '20-21 HCP, balanced'];
       return;
     }
     const shape = hand.labeledShape();
     if (hcp >= 16) {
-      const bid = yield [new Bid(1, Strain.CLUBS), "16+ HCP (17+ if balanced)"];
+      const bid = yield [new Bid(1, Strain.CLUBS), '16+ HCP (17+ if balanced)'];
       if (bid.level === 1 && bid.strain === Strain.DIAMONDS) {
         if (balanced && hcp <= 19) {
-          yield [new Bid(1, Strain.NO_TRUMP), "17-19 HCP, balanced"];
+          yield [new Bid(1, Strain.NO_TRUMP), '17-19 HCP, balanced'];
           return;
         }
         // TODO: Kokish.
         if (balanced && hcp <= 24) {
-          yield [new Bid(2, Strain.NO_TRUMP), "22-24 HCP, balanced"];
+          yield [new Bid(2, Strain.NO_TRUMP), '22-24 HCP, balanced'];
           return;
         }
         if (balanced && hcp <= 27) {
-          yield [new Bid(3, Strain.NO_TRUMP), "25-27 HCP, balanced"];
+          yield [new Bid(3, Strain.NO_TRUMP), '25-27 HCP, balanced'];
           return;
         }
         if (balanced && hcp <= 30) {
-          yield [new Bid(4, Strain.NO_TRUMP), "28-30 HCP, balanced"];
+          yield [new Bid(4, Strain.NO_TRUMP), '28-30 HCP, balanced'];
           return;
         }
         if (balanced && hcp <= 33) {
-          yield [new Bid(5, Strain.NO_TRUMP), "31-33 HCP, balanced"];
+          yield [new Bid(5, Strain.NO_TRUMP), '31-33 HCP, balanced'];
           return;
         }
         if (balanced && hcp <= 36) {
-          yield [new Bid(6, Strain.NO_TRUMP), "34-36 HCP, balanced"];
+          yield [new Bid(6, Strain.NO_TRUMP), '34-36 HCP, balanced'];
           return;
         }
         if (balanced) {
-          yield [new Bid(7, Strain.NO_TRUMP), "37 HCP, balanced"];
+          yield [new Bid(7, Strain.NO_TRUMP), '37 HCP, balanced'];
           return;
         }
         // TODO
@@ -363,31 +363,31 @@ function* smpConstructiveBid(hand, vulnerability, seat, initialBid) {
       return;
     }
     if (shape[0][0] === Suit.SPADES && shape[0][1] >= 5) {
-      yield [new Bid(1, Strain.SPADES), "5+♠, 10-15 HCP"];
+      yield [new Bid(1, Strain.SPADES), '5+♠, 10-15 HCP'];
       return;
     }
     if (shape[0][0] === Suit.HEARTS && shape[0][1] >= 5) {
-      yield [new Bid(1, Strain.HEARTS), "5+♥, 10-15 HCP"];
+      yield [new Bid(1, Strain.HEARTS), '5+♥, 10-15 HCP'];
       return;
     }
     if (shape[0][0] === Suit.CLUBS && shape[0][1] >= 6) {
-      yield [new Bid(2, Strain.CLUBS), "6+♣, 10-15 HCP"];
+      yield [new Bid(2, Strain.CLUBS), '6+♣, 10-15 HCP'];
       return;
     }
     if (shape[3][0] === Suit.DIAMONDS && shape[3][1] <= 1) {
-      yield [new Bid(2, Strain.DIAMONDS), "4=4=1=4 / 4=4=0=5 / 4=3=1=5 / 3=4=1=5, 10-15 HCP"];
+      yield [new Bid(2, Strain.DIAMONDS), '4=4=1=4 / 4=4=0=5 / 4=3=1=5 / 3=4=1=5, 10-15 HCP'];
       return;
     }
-    yield [new Bid(1, Strain.DIAMONDS), "2+♦, 10-15 HCP"];
+    yield [new Bid(1, Strain.DIAMONDS), '2+♦, 10-15 HCP'];
     return;
   } else {
     if (initialBid.level === 1 && initialBid.strain === Strain.CLUBS) {
       if (hcp <= 7) {
-        yield [new Bid(1, Strain.DIAMONDS), "0-7 HCP"];
+        yield [new Bid(1, Strain.DIAMONDS), '0-7 HCP'];
         return;
       }
       if (hcp <= 11) {
-        yield [new Bid(1, Strain.HEARTS), "8-11 HCP"];
+        yield [new Bid(1, Strain.HEARTS), '8-11 HCP'];
         return;
       }
       // TODO
