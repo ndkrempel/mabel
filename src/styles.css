@@ -1,0 +1,156 @@
+header {
+  position: fixed;
+  top: 1.5rem;
+  right: 0;
+}
+
+h1 {
+  margin: 0 1.5rem;
+  background-image: linear-gradient(white, #fee);
+  border: 0.5rem solid #fbb;
+  border-left: none;
+  border-right: none;
+  border-radius: 0.2em;
+  padding: 0.5rem 1rem;
+  color: #fbb;
+  text-align: center;
+  text-transform: uppercase;
+  font-family: 'Days One', sans-serif;
+  font-size: 5rem;
+}
+
+h2 {
+  margin: 0 1.5rem;
+  padding: 0.2rem 0.5rem;
+  color: #fbb;
+  text-align: right;
+  font-family: 'Days One', sans-serif;
+  font-size: 1rem;
+}
+
+main {
+  margin: 4rem 0;
+}
+
+#northHand, #southHand {
+  margin: 1.4rem auto;
+  border: 1px solid black;
+  padding: 0.7rem;
+  width: 14rem;
+  line-height: 1.2em;
+  letter-spacing: 0.1em;
+  font-family: 'Inconsolata', monospace;
+  font-size: 1.4rem;
+}
+
+#northHand {
+  position: relative;
+  visibility: hidden;
+}
+
+#northHand:after {
+  display: block;
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  left: -1px;
+  right: -1px;
+  visibility: visible;
+  border: 1px solid black;
+  padding: 0.7rem;
+  line-height: 6.44rem;
+  letter-spacing: 0.1em;
+  vertical-align: top;
+  text-align: center;
+  font-family: 'Inconsolata', monospace;
+  font-size: 7rem;
+  content: '?';
+}
+
+#northHand:hover {
+  visibility: visible;
+}
+
+#northHand:hover:after {
+  visibility: hidden;
+}
+
+#auction {
+  table-layout: fixed;
+  margin: 1.4rem auto;
+  border: 1px solid black;
+  border-collapse: collapse;
+  font-size: 1.2rem;
+}
+
+#auction > thead > tr > th,
+#auction > thead > tr > td,
+#auction > tbody > tr > th,
+#auction > tbody > tr > td {
+  width: 2rem;
+  text-align: center;
+}
+
+#auction > thead > tr {
+  border: 1px solid black;
+  font-weight: bold;
+}
+
+.nonVulnerable {
+  background: white;
+}
+
+.vulnerable {
+  background: #fbb;
+}
+
+.dealer:before {
+  content: '•';
+}
+
+#controls {
+  text-align: center;
+}
+
+button {
+  margin: 0.12rem;
+  background: white;
+  border: 1px solid black;
+  border-radius: 0.24rem;
+  padding: 0.24rem;
+  width: auto;
+  text-align: center;
+  font-size: 1.2rem;
+}
+
+button:disabled {
+  opacity: 0.3;
+}
+
+button:enabled:hover {
+  background: #ddd;
+}
+
+button:enabled:active {
+  background: #fdd;
+}
+
+button.call {
+  width: 2.4rem;
+}
+
+.club {
+  color: green;
+}
+
+.diamond {
+  color: orange;
+}
+
+.heart {
+  color: red;
+}
+
+.spade {
+  color: blue;
+}
