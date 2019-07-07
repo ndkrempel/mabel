@@ -421,7 +421,7 @@ function* smpConstructiveBid(hand, vulnerability, seat, initialBid) {
               if (haveHearts && haveSpades) {
                 // TODO: Cue bid?
                 yield [new Bid(4, Strain.SPADES), 'To play (4 ♠)'];
-                // TODO: Handle possible repsonse.
+                // TODO: Handle possible response.
               } else {
                 yield [null, 'To play' + (haveHearts ? ' (2-3 ♠)' : ' (forced)')];
               }
@@ -440,10 +440,10 @@ function* smpConstructiveBid(hand, vulnerability, seat, initialBid) {
               if (haveHearts && haveSpades) {
                 if (accept) {
                   yield [new Bid(bid.level + 2, Strain.SPADES), 'Accepting invite (15-16 HCP), to play (4 ♠)'];
-                  // TODO: Handle possible repsonse.
+                  // TODO: Handle possible response.
                 } else {
                   yield [new Bid(bid.level + 1, Strain.SPADES), 'Declining invite (14-15 HCP), to play (4 ♠)'];
-                  // TODO: Handle possible repsonse.
+                  // TODO: Handle possible response.
                 }
               } else {
                 if (accept) {
@@ -517,6 +517,7 @@ function* smpConstructiveBid(hand, vulnerability, seat, initialBid) {
               yield [null, 'To play (2 ' + SUIT_UNICODE_STRING[xferSuit] + ')'];
             } else {
               yield [new Bid(4, xferSuit), 'To play (3-5 ' + SUIT_UNICODE_STRING[xferSuit] + ')'];
+              // TODO: Handle possible response.
             }
             return;
           }
@@ -619,22 +620,22 @@ function* smpConstructiveBid(hand, vulnerability, seat, initialBid) {
       return;
     }
     if (sortedShape[0][0] === Suit.SPADES && sortedShape[0][1] >= 5) {
-      yield [new Bid(1, Strain.SPADES), '5+♠, 10-15 HCP (11-13 if balanced)'];
+      yield [new Bid(1, Strain.SPADES), '5+ ♠, 10-15 HCP (11-13 if balanced)'];
       return;
     }
     if (sortedShape[0][0] === Suit.HEARTS && sortedShape[0][1] >= 5) {
-      yield [new Bid(1, Strain.HEARTS), '5+♥, 10-15 HCP (11-13 if balanced)'];
+      yield [new Bid(1, Strain.HEARTS), '5+ ♥, 10-15 HCP (11-13 if balanced)'];
       return;
     }
     if (sortedShape[0][0] === Suit.CLUBS && sortedShape[0][1] >= 6) {
-      yield [new Bid(2, Strain.CLUBS), '6+♣, 10-15 HCP'];
+      yield [new Bid(2, Strain.CLUBS), '6+ ♣, 10-15 HCP'];
       return;
     }
     if (sortedShape[3][0] === Suit.DIAMONDS && sortedShape[3][1] <= 1) {
       yield [new Bid(2, Strain.DIAMONDS), '4=4=1=4 / 4=4=0=5 / 4=3=1=5 / 3=4=1=5, 10-15 HCP'];
       return;
     }
-    yield [new Bid(1, Strain.DIAMONDS), '2+♦, 10-15 HCP (either natural unbalanced, or any 11-13 balanced with no 5-card major)'];
+    yield [new Bid(1, Strain.DIAMONDS), '2+ ♦, 10-15 HCP (either 3+ ♦ unbalanced, or any 11-13 balanced with no 5-card major)'];
     return;
   } else {
     // Responding as non-passed hand.
