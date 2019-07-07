@@ -1,0 +1,8 @@
+AQxx|Kxxx|AKx|Qx: 1C
+KQJxx|AQxx|Axx|x: 1C
+Ax|x|KQxx|AKQxxx: 1C
+Kxx|AQxx|Qxx|KQx: 1N
+KQxxx|AJx|AKx|Kx: 2N
+AQJx|AKQxxx|KQxx|-: 1C
+KQJxx|Kxx|x|Axxx: 1S
+AKQxxx|x|Axxx|Qx: 1C
