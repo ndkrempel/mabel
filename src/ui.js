@@ -102,7 +102,7 @@ function redeal() {
 }
 
 function makeAutomaticCalls() {
-  loop: while (true) {
+  loop: while (!isFinished()) {
     switch (getActivePlayer()) {
       case 2: break loop;
       case 0: aiCall(); break;
@@ -122,7 +122,7 @@ function aiCall() {
     result = ai.next();
   }
   if (result.done) {
-    explanation = 'Mabel is confused.';
+    explanation = 'Mabel is confused';
     makeCall(null);
     setTimeout(() => alert(explanation), 200);
     return;

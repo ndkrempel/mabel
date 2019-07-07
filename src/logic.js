@@ -307,6 +307,7 @@ class Bid {
 
 function* smpConstructiveBid(hand, vulnerability, seat, initialBid) {
   const hcp = hand.hcp();
+  const shape = hand.shape();
   const response = function*(passedHand, openingBid) {
     // Responding.
     if (openingBid.level === 1 && openingBid.strain === Strain.CLUBS) {
@@ -322,6 +323,44 @@ function* smpConstructiveBid(hand, vulnerability, seat, initialBid) {
       return;
     }
   };
+  const gerber = function*() {
+    const numAces = hand.cards.filter(_ => _.rank === Rank.ACE).length;
+    let response, explanation;
+    switch (numAces) {
+      case 0:
+      case 4: response = Strain.DIAMONDS; explanation = '0 or 4 aces'; break;
+      case 1: response = Strain.HEARTS; explanation = '1 ace'; break;
+      case 2: response = Strain.SPADES; explanation = '2 aces'; break;
+      case 3: response = Strain.NO_TRUMP; explanation = '3 aces'; break;
+    }
+    const bid = yield [new Bid(4, response), explanation];
+    if (bid.level === 5 && bid.strain === Strain.CLUBS) {
+      // King ask.
+      const numKings = hand.cards.filter(_ => _.rank === Rank.KING).length;
+      let response, explanation;
+      switch (numKings) {
+        case 0:
+        case 4: response = Strain.DIAMONDS; explanation = '0 or 4 kings'; break;
+        case 1: response = Strain.HEARTS; explanation = '1 king'; break;
+        case 2: response = Strain.SPADES; explanation = '2 kings'; break;
+        case 3: response = Strain.NO_TRUMP; explanation = '3 kings'; break;
+      }
+      const bid = yield [new Bid(5, response), explanation];
+      return;
+    }
+    return;
+  };
+  const josephine = function*(trumpSuit) {
+    const numTopHonors = hand.cards.filer(_ => _.suit === trumpSuit && _.rank >= Rank.QUEEN).length;
+    const suitString = SUIT_UNICODE_STRING[trumpSuit];
+    switch (numTopHonors) {
+      case 0:
+      case 1: yield [null, '0 or 1 top ' + suitString + ' honors']; break;
+      case 2: yield [new Bid(6, trumpSuit), '2 top ' + suitString + ' honors']; break;
+      case 3: yield [new Bid(7, trumpSuit), '3 top ' + suitString + ' honors']; break;
+    }
+    return;
+  }
   if (!initialBid) {
     // Opening.
     const balanced = hand.isBalanced();
@@ -335,14 +374,213 @@ function* smpConstructiveBid(hand, vulnerability, seat, initialBid) {
     }
     if (balanced && hcp >= 14 && hcp <= 16) {
       // TODO: Include (some) 5m(422).
-      yield [new Bid(1, Strain.NO_TRUMP), '14-16 HCP, balanced'];
+      const bid = yield [new Bid(1, Strain.NO_TRUMP), '14-16 HCP, balanced'];
+      if (bid.strain === Strain.NO_TRUMP) {
+        switch (bid.level) {
+          case 3:
+          case 6:
+          case 7:
+            // To play.
+            yield [null, 'To play (forced)'];
+            return;
+          case 2:
+          case 4:
+          case 5:
+            // Invitational.
+            // TODO: Finer judgment on 15 HCP.
+            const accept = hcp >= 15;
+            if (accept) {
+              yield [new Bid(bid.level + (bid.level === 2 ? 1 : 2), Strain.NO_TRUMP), 'Accepting invite (15-16 HCP), to play'];
+            } else {
+              yield [bid.level === 5 ? new Bid(6, Strain.NO_TRUMP) : null, 'Declining invite (14-15 HCP), to play'];
+            }
+            return;
+        }
+      }
+      if (bid.level === 2 && bid.strain === Strain.CLUBS) {
+        // Stayman.
+        const haveHearts = shape[Suit.HEARTS] >= 4,
+            haveSpades = shape[Suit.SPADES] >= 4;
+        let response, explanation;
+        if (haveHearts) {
+          response = Strain.HEARTS;
+          explanation = '4-5 ♥';
+        } else if (haveSpades) {
+          response = Strain.SPADES;
+          explanation = '4-5 ♠, 2-3 ♥';
+        } else {
+          response = Strain.DIAMONDS;
+          explanation = '2-3 ♥, 2-3 ♠';
+        }
+        response = [new Bid(2, response), explanation];
+        const bid = yield response;
+        if (bid.strain === Strain.NO_TRUMP) {
+          switch (bid.level) {
+            case 3:
+              // To play (can be pass-or-correct).
+              if (haveHearts && haveSpades) {
+                // TODO: Cue bid?
+                yield [new Bid(4, Strain.SPADES), 'To play (4 ♠)'];
+                // TODO: Handle possible repsonse.
+              } else {
+                yield [null, 'To play' + (haveHearts ? ' (2-3 ♠)' : ' (forced)')];
+              }
+              return;
+            case 6:
+            case 7:
+              // To play.
+              yield [null, 'To play (forced)'];
+              return;
+            case 2:
+            case 4:
+            case 5:
+              // Invitational.
+              // TODO: Finer judgment on 15 HCP.
+              const accept = hcp >= 15;
+              if (haveHearts && haveSpades) {
+                if (accept) {
+                  yield [new Bid(bid.level + 2, Strain.SPADES), 'Accepting invite (15-16 HCP), to play (4 ♠)'];
+                  // TODO: Handle possible repsonse.
+                } else {
+                  yield [new Bid(bid.level + 1, Strain.SPADES), 'Declining invite (14-15 HCP), to play (4 ♠)'];
+                  // TODO: Handle possible repsonse.
+                }
+              } else {
+                if (accept) {
+                  yield [new Bid(bid.level + (bid.level === 2 ? 1 : 2), Strain.NO_TRUMP), 'Accepting invite (15-16 HCP), to play' + (haveHearts ? ' (2-3 ♠)' : '')];
+                } else {
+                  yield [bid.level === 5 ? new Bid(6, Strain.NO_TRUMP) : null, 'Declining invite (14-15 HCP), to play' + (haveHearts ? ' (2-3 ♠)' : '')];
+                }
+              }
+              return;
+          }
+        }
+        if (response === Strain.DIAMONDS && bid.level === 2 && bid.strain === Strain.HEARTS) {
+          if (shape[Suit.HEARTS] === 2) {
+            yield [new Bid(2, Suit.SPADES), 'To play (2 ♥, 3 ♠)'];
+          } else {
+            yield [null, 'To play (3 ♥)'];
+          }
+          return;
+        }
+        if (response === Strain.DIAMONDS && bid.level === 2 && bid.strain === Strain.SPADES) {
+          yield [null, 'To play (forced)'];
+          return;
+        }
+        if (response !== Strain.DIAMONDS && bid.level === 3 && bid.strain === response) {
+          // Invitational.
+          // TODO: Finer judgment on 15 HCP.
+          const accept = hcp >= 15;
+          if (accept) {
+            yield [new Bid(4, response), 'Accepting invite (15-16 HCP), to play'];
+          } else {
+            yield [null, 'Declining invite (14-15 HCP), to play'];
+          }
+          return;
+        }
+        if (response !== Strain.DIAMONDS && bid.level === 4 && bid.strain === response) {
+          // To play.
+          yield [null, 'To play (forced)'];
+          return;
+        }
+        // TODO: 2S (over 2H), 3C, 3D, 3H (over 2D/2S), 3S (over 2D/2H), bids above 3NT
+        return;
+      }
+      if (bid.level === 2 && bid.strain <= Strain.HEARTS) {
+        // Transfer to major suit.
+        // TODO: Super-accepts.
+        const xferSuit = bid.strain + 1;
+        {
+          const bid = yield [new Bid(2, xferSuit), 'Completing transfer (forced)'];
+          if (bid.level === 2 && bid.strain === Strain.NO_TRUMP) {
+            // Invitational.
+            // TODO: Finer judgment on 15 HCP.
+            const accept = hcp >= 15;
+            if (accept) {
+              if (shape[xferSuit] === 2) {
+                yield [new Bid(3, Strain.NO_TRUMP), 'Accepting invite (15-16 HCP), to play (2 ' + SUIT_UNICODE_STRING[xferSuit] + ')'];
+              } else {
+                yield [new Bid(4, xferSuit), 'Accepting invite (15-16 HCP), to play (3-5 ' + SUIT_UNICODE_STRING[xferSuit] + ')'];
+              }
+            } else {
+              if (shape[xferSuit] === 2) {
+                yield [null, 'Declining invite (14-15 HCP), to play (2 ' + SUIT_UNICODE_STRING[xferSuit] + ')'];
+              } else {
+                yield [new Bid(3, xferSuit), 'Declining invite (14-15 HCP), to play (3-5 ' + SUIT_UNICODE_STRING[xferSuit] + ')'];
+              }
+            }
+            return;
+          }
+          if (bid.level === 3 && bid.strain === Strain.NO_TRUMP) {
+            // To play (pass-or-correct).
+            if (shape[xferSuit] === 2) {
+              yield [null, 'To play (2 ' + SUIT_UNICODE_STRING[xferSuit] + ')'];
+            } else {
+              yield [new Bid(4, xferSuit), 'To play (3-5 ' + SUIT_UNICODE_STRING[xferSuit] + ')'];
+            }
+            return;
+          }
+          if (bid.level === 3 && bid.strain === xferSuit) {
+            // Invitational.
+            // TODO: Finer judgment on 15 HCP.
+            const accept = hcp >= 15;
+            if (accept) {
+              yield [new Bid(4, xferSuit), 'Accepting invite (15-16 HCP), to play'];
+            } else {
+              yield [null, 'Declining invite (14-15 HCP), to play'];
+            }
+            return;
+          }
+          if (bid.level === 4 && bid.strain === xferSuit) {
+            // To play.
+            yield [null, 'To play (forced)'];
+            return;
+          }
+          // TODO
+          return;
+        }
+      }
+      if (bid.level === 2 && bid.strain === Strain.SPADES) {
+        // Transfer to a minor.
+        const bid = yield [new Bid(3, Strain.CLUBS), 'Completing transfer (forced)'];
+        if (bid.level === 3 && bid.strain === Strain.DIAMONDS) {
+          yield [null, 'To play (forced)'];
+        }
+        return;
+      }
+      if (bid.level === 3) {
+        // Single-suited slam try.
+        // TODO
+        return;
+      }
+      if (bid.level === 4 && bid.strain === Strain.CLUBS) {
+        // Gerber.
+        yield* gerber();
+        return;
+      }
+      if (bid.level === 4 && bid.strain === Strain.DIAMONDS) {
+        // Texas transfer to hearts.
+        yield [new Bid(4, Strain.HEARTS), 'Completing transfer (forced)'];
+        return;
+      }
+      if (bid.level === 4 && bid.strain === Strain.HEARTS) {
+        // Texas transfer to spades.
+        yield [new Bid(4, Strain.SPADES), 'Completing transfer (forced)'];
+        return;
+      }
+      if (bid.level === 5 && bid.strain >= Strain.HEARTS) {
+        // Josephine.
+        yield* josephine(bid.strain);
+        return;
+      }
+      yield [null, 'To play (forced)'];
       return;
     }
     if (balanced && hcp >= 20 && hcp <= 21) {
       yield [new Bid(2, Strain.NO_TRUMP), '20-21 HCP, balanced'];
       return;
     }
-    const shape = hand.labeledShape();
+    const sortedShape = hand.labeledShape();
     if (hcp >= 16) {
       const bid = yield [new Bid(1, Strain.CLUBS), '16+ HCP (17+ if balanced)'];
       if (bid.level === 1 && bid.strain === Strain.DIAMONDS) {
@@ -380,23 +618,23 @@ function* smpConstructiveBid(hand, vulnerability, seat, initialBid) {
       }
       return;
     }
-    if (shape[0][0] === Suit.SPADES && shape[0][1] >= 5) {
-      yield [new Bid(1, Strain.SPADES), '5+♠, 10-15 HCP'];
+    if (sortedShape[0][0] === Suit.SPADES && sortedShape[0][1] >= 5) {
+      yield [new Bid(1, Strain.SPADES), '5+♠, 10-15 HCP (11-13 if balanced)'];
       return;
     }
-    if (shape[0][0] === Suit.HEARTS && shape[0][1] >= 5) {
-      yield [new Bid(1, Strain.HEARTS), '5+♥, 10-15 HCP'];
+    if (sortedShape[0][0] === Suit.HEARTS && sortedShape[0][1] >= 5) {
+      yield [new Bid(1, Strain.HEARTS), '5+♥, 10-15 HCP (11-13 if balanced)'];
       return;
     }
-    if (shape[0][0] === Suit.CLUBS && shape[0][1] >= 6) {
+    if (sortedShape[0][0] === Suit.CLUBS && sortedShape[0][1] >= 6) {
       yield [new Bid(2, Strain.CLUBS), '6+♣, 10-15 HCP'];
       return;
     }
-    if (shape[3][0] === Suit.DIAMONDS && shape[3][1] <= 1) {
+    if (sortedShape[3][0] === Suit.DIAMONDS && sortedShape[3][1] <= 1) {
       yield [new Bid(2, Strain.DIAMONDS), '4=4=1=4 / 4=4=0=5 / 4=3=1=5 / 3=4=1=5, 10-15 HCP'];
       return;
     }
-    yield [new Bid(1, Strain.DIAMONDS), '2+♦, 10-15 HCP'];
+    yield [new Bid(1, Strain.DIAMONDS), '2+♦, 10-15 HCP (either natural unbalanced, or any 11-13 balanced with no 5-card major)'];
     return;
   } else {
     // Responding as non-passed hand.
